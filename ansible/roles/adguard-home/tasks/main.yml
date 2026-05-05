@@ -1,7 +1,7 @@
 ---
 - name: Install dependencies
   apt:
-    name: [curl, tar]
+    name: [curl, tar, socat, openssl, cron]
     state: present
     update_cache: true
 
@@ -48,6 +48,52 @@
     state: started
     enabled: true
     daemon_reload: true
+
+- name: Create cert directory
+  file:
+    path: /opt/AdGuardHome/cert
+    state: directory
+    mode: "0750"
+
+- name: Install acme.sh
+  shell: curl -s https://get.acme.sh | HOME=/root sh
+  args:
+    creates: /root/.acme.sh/acme.sh
+
+- name: Issue certificate for {{ adguard_domain }}
+  command: >
+    /root/.acme.sh/acme.sh --issue
+    -d {{ adguard_domain }}
+    --dns dns_online
+    --server letsencrypt
+  environment:
+    HOME: /root
+    ONLINE_API_KEY: "{{ online_api_key }}"
+  register: acme_issue
+  failed_when: acme_issue.rc not in [0, 2]
+  changed_when: acme_issue.rc == 0
+  args:
+    creates: /root/.acme.sh/{{ adguard_domain }}_ecc/{{ adguard_domain }}.cer
+
+- name: Install certificate to AdGuard cert directory
+  command: >
+    /root/.acme.sh/acme.sh --install-cert
+    --ecc
+    -d {{ adguard_domain }}
+    --fullchain-file /opt/AdGuardHome/cert/cert.pem
+    --key-file /opt/AdGuardHome/cert/key.pem
+    --reloadcmd "systemctl restart AdGuardHome"
+  environment:
+    HOME: /root
+  args:
+    creates: /opt/AdGuardHome/cert/cert.pem
+
+- name: Set up acme.sh cron for auto-renewal
+  cron:
+    name: "acme.sh renewal"
+    minute: "0"
+    hour: "0"
+    job: 'HOME=/root /root/.acme.sh/acme.sh --cron --home /root/.acme.sh > /dev/null'
 
 - name: Flush handlers
   meta: flush_handlers
