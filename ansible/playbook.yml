@@ -21,7 +21,7 @@
     - name: Accept host key
       ansible.builtin.known_hosts:
         name: "{{ ansible_host }}"
-        key: "{{ lookup('pipe', 'ssh-keyscan -t ed25519 ' + ansible_host) }}"
+        key: "{{ lookup('pipe', 'ssh-keyscan -T 5 -t ed25519 ' + ansible_host) }}"
         state: present
       delegate_to: localhost
       become: false
@@ -56,7 +56,7 @@
     - name: Accept host key
       ansible.builtin.known_hosts:
         name: "{{ ansible_host }}"
-        key: "{{ lookup('pipe', 'ssh-keyscan -t ed25519 ' + ansible_host) }}"
+        key: "{{ lookup('pipe', 'ssh-keyscan -T 5 -t ed25519 ' + ansible_host) }}"
         state: present
       delegate_to: localhost
       become: false
