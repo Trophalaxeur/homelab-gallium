@@ -78,6 +78,7 @@
       - cron
       - logrotate
       - curl
+      - sudo
       - mailutils
       - msmtp
       - yq
@@ -131,7 +132,7 @@
     url: https://raw.githubusercontent.com/multica-ai/multica/refs/tags/v0.3.2/scripts/install.sh
     dest: /tmp/multica-install.sh
     mode: "0755"
-    checksum: "sha256:20cf22bb5324e868f081aeaa669267aaecff1949ca29c21996323bd3fa138870"
+    checksum: "sha256:9e82feee4e3e9a2a63f99d1e674fa9b6b2ef4d8001572a14125d325fc16bf055"
 
 - name: Install multica CLI
   command: /tmp/multica-install.sh
@@ -144,13 +145,21 @@
     url: https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.40.0/install.sh
     dest: /tmp/rtk-install.sh
     mode: "0755"
-    checksum: "sha256:09f3d9b5543f772895f5cb0c66dc93602be451bb09fbd220bba185c4a14cd88d"
+    checksum: "sha256:0c46611d70d0eee64c43c6398f8b1fe057b7f0b052810bbeec09288898ba9a46"
 
 - name: Install RTK (token-optimization proxy)
   become_user: neonuser
   command: /tmp/rtk-install.sh
   args:
     creates: /home/neonuser/.local/bin/rtk
+
+- name: Ensure neonuser Claude config dir exists
+  file:
+    path: /home/neonuser/.claude
+    state: directory
+    owner: neonuser
+    group: neonuser
+    mode: "0700"
 
 - name: Initialize RTK Claude Code hook for neonuser
   become_user: neonuser
