@@ -85,7 +85,9 @@ The public key is always available at `~/.ssh/id_ed25519.pub`. If the private ke
 ssh-keygen -t ed25519 -C "flefevre@thallium"
 ```
 
-Then update `ssh_public_key` in `terraform/terraform.tfvars` and re-apply Terraform.
+Then update the public key in two places:
+- `terraform/terraform.tfvars` (`ssh_public_key`) → re-apply Terraform to authorize root access on existing LXCs
+- `ansible/group_vars/all/vars.yml` (`ssh_public_key`) → re-run Ansible to update neonuser's `authorized_keys`
 
 ---
 
