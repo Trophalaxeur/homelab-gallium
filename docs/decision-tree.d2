@@ -1,0 +1,114 @@
+direction: down
+
+title: "Arbre de décision : Claude Code vs GitHub Copilot Agent"
+
+start: "Départ"
+
+q1: "La tâche doit-elle envoyer un mail,\ngénérer un récap ou produire\nun rendu très personnalisé ?"
+q2: "Le repo est-il privé,\nsensible ou lié à ton homelab ?"
+q3: "La tâche concerne-t-elle\nplusieurs repos ou ton réseau local ?"
+q4: "Est-ce une petite tâche GitHub\nponctuelle sur repo public ?"
+q5: "Veux-tu une PR automatique\nbien intégrée à GitHub avec CI/logs ?"
+q6: "Veux-tu éviter toute installation\nou maintenance locale ?"
+q7: "Veux-tu faire tourner Copilot\nsur ton homelab ?"
+
+claude_local: {
+  label: "Claude Code CLI sur homelab"
+  shape: rectangle
+  style.fill: "#E8F5E9"
+}
+
+copilot_github: {
+  label: "GitHub Copilot Agent\ndepuis GitHub"
+  shape: rectangle
+  style.fill: "#E3F2FD"
+}
+
+claude_actions: {
+  label: "Claude Code via\nGitHub Actions"
+  shape: rectangle
+  style.fill: "#FFF3E0"
+}
+
+copilot_self_hosted: {
+  label: "Copilot Agent sur homelab\n/self-hosted runner"
+  shape: rectangle
+  style.fill: "#FCE4EC"
+}
+
+avoid: {
+  label: "À éviter au début\nsauf besoin avancé"
+  shape: rectangle
+  style.fill: "#FFEBEE"
+}
+
+why_local: {
+  label: "Pourquoi ?\n- repos privés\n- mails / rapports\n- multi-repos\n- accès local\n- orchestration nocturne\n- personnalisation forte"
+  shape: rectangle
+  style.fill: "#F9FBE7"
+  style.stroke-dash: 4
+}
+
+why_copilot: {
+  label: "Pourquoi ?\n- simple\n- intégré à GitHub\n- idéal pour petites PR/reviews\n- zéro maintenance homelab"
+  shape: rectangle
+  style.fill: "#F9FBE7"
+  style.stroke-dash: 4
+}
+
+why_actions: {
+  label: "Pourquoi ?\n- PR automatisées\n- checks GitHub\n- logs Actions\n- bon compromis GitHub + Claude"
+  shape: rectangle
+  style.fill: "#F9FBE7"
+  style.stroke-dash: 4
+}
+
+why_self_hosted: {
+  label: "Pourquoi rarement ?\n- complexité élevée\n- plutôt orienté organisation\n- runners éphémères recommandés\n- peu rentable au démarrage"
+  shape: rectangle
+  style.fill: "#F9FBE7"
+  style.stroke-dash: 4
+}
+
+start -> q1
+
+q1 -> claude_local: "Oui"
+claude_local -> why_local
+
+q1 -> q2: "Non"
+
+q2 -> claude_local: "Oui"
+q2 -> q3: "Non"
+
+q3 -> claude_local: "Oui"
+q3 -> q4: "Non"
+
+q4 -> copilot_github: "Oui"
+copilot_github -> why_copilot
+
+q4 -> q5: "Non"
+
+q5 -> claude_actions: "Oui"
+claude_actions -> why_actions
+
+q5 -> q6: "Non"
+
+q6 -> copilot_github: "Oui"
+q6 -> q7: "Non"
+
+q7 -> copilot_self_hosted: "Oui"
+copilot_self_hosted -> avoid
+copilot_self_hosted -> why_self_hosted
+
+q7 -> claude_local: "Non"
+
+legend: {
+  label: "Règle rapide\n\nPrivé / mail / multi-repos / local → Claude Code CLI homelab\nPetit besoin GitHub public → Copilot Agent\nPR automatisée GitHub + CI → Claude Code GitHub Actions\nCopilot self-hosted → seulement besoin avancé"
+  shape: rectangle
+  style.fill: "#F9FBE7"
+  style.stroke-dash: 4
+}
+
+claude_local -> legend: ""
+copilot_github -> legend: ""
+claude_actions -> legend: ""
