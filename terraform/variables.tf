@@ -33,6 +33,12 @@ variable "lxc_template" {
   default     = "local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst"
 }
 
+variable "lxc_datastore" {
+  description = "Proxmox datastore pour les disques LXC (ForceNew sur changement — recreate le conteneur)"
+  type        = string
+  default     = "local-zfs"
+}
+
 variable "adguard_vmid" {
   description = "VMID du conteneur AdGuard"
   type        = number

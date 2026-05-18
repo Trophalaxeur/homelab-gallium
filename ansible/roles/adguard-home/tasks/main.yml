@@ -67,6 +67,7 @@
     --dns dns_online
     --server letsencrypt
     --accountemail {{ acme_email }}
+    --keylength ec-256
   environment:
     HOME: /root
     ONLINE_API_KEY: "{{ online_api_key }}"

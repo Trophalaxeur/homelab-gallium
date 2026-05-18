@@ -155,11 +155,15 @@
     group: neonuser
     mode: "0600"
 
-- name: Accept GitHub host key
+# Pinned ed25519 fingerprint from
+# https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
+- name: Authorize GitHub ed25519 host key for neonuser
   become_user: neonuser
-  shell: ssh-keyscan github.com >> /home/neonuser/.ssh/known_hosts
-  args:
-    creates: /home/neonuser/.ssh/known_hosts
+  ansible.builtin.known_hosts:
+    name: github.com
+    key: "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+    state: present
+    path: /home/neonuser/.ssh/known_hosts
 
 - name: Read deploy public key
   slurp:

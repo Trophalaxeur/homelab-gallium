@@ -55,7 +55,7 @@ resource "proxmox_virtual_environment_container" "adguard" {
   }
 
   disk {
-    datastore_id = "local-zfs"
+    datastore_id = var.lxc_datastore
     size         = 4
   }
 

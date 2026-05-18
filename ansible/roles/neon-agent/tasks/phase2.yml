@@ -15,12 +15,13 @@
   no_log: true
   changed_when: true
 
-# Step 19 — append MULTICA_TOKEN to /etc/neon.env
-- name: Append MULTICA_TOKEN to /etc/neon.env
-  blockinfile:
-    path: /etc/neon.env
-    marker: "# {mark} MULTICA_TOKEN"
-    block: "MULTICA_TOKEN={{ vault_multica_pat }}"
+# Step 19 — re-deploy /etc/neon.env with MULTICA_TOKEN
+# The template includes MULTICA_TOKEN conditionally when vault_multica_pat is defined.
+# Re-running Phase 1 after this point preserves the token (single source of truth).
+- name: Re-deploy /etc/neon.env with MULTICA_TOKEN
+  template:
+    src: neon-env.j2
+    dest: /etc/neon.env
     owner: root
     group: neonuser
     mode: "0640"

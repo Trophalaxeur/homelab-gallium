@@ -37,7 +37,7 @@ resource "proxmox_virtual_environment_container" "neon" {
   }
 
   disk {
-    datastore_id = "local-zfs"
+    datastore_id = var.lxc_datastore
     size         = 20
   }
 

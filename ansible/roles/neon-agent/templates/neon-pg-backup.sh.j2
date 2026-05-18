@@ -7,7 +7,9 @@ ADMIN_EMAIL="${NEON_ADMIN_EMAIL:-{{ neon_admin_email | default('admin@flefevre.f
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 DUMP_FILE="$BACKUP_DIR/multica-$TIMESTAMP.sql.gz"
 
-trap 'echo "pg_backup failed at $(date)" | mail -s "[neon] pg_backup FAILED" "$ADMIN_EMAIL"' ERR
+# EXIT trap fires on ANY exit (including explicit `exit 1` and `set -e` errors).
+# Checks return code and sends failure email when non-zero.
+trap 'rc=$?; if [ $rc -ne 0 ]; then echo "pg_backup failed (rc=$rc) at $(date)" | mail -s "[neon] pg_backup FAILED" "$ADMIN_EMAIL"; fi' EXIT
 
 [ -d "$BACKUP_DIR" ] || { echo "$BACKUP_DIR missing"; exit 1; }
 
