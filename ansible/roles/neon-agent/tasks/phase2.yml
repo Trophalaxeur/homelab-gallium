@@ -9,11 +9,19 @@
   args:
     creates: /home/neonuser/.multica/config.json
 
+# Idempotent login: check auth status first, only login if not already logged in.
+- name: Check multica CLI auth status
+  become_user: neonuser
+  command: multica auth status
+  register: multica_auth
+  failed_when: false
+  changed_when: false
+
 - name: Log in multica CLI with PAT
   become_user: neonuser
   command: multica login --token {{ vault_multica_pat }}
   no_log: true
-  changed_when: true
+  when: multica_auth.rc != 0
 
 # Step 19 — re-deploy /etc/neon.env with MULTICA_TOKEN
 # The template includes MULTICA_TOKEN conditionally when vault_multica_pat is defined.

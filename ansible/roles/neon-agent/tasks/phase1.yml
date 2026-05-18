@@ -206,40 +206,47 @@
   register: deploy_pubkeys
   loop: "{{ deploy_key_repos }}"
 
-# Register each deploy key on its own repo (GitHub deploy keys are repo-scoped:
-# one key cannot be attached to multiple repos).
-# 201 = created, 422 "already in use" = idempotent rerun; any other 422 fails below.
-- name: Register deploy key on each repository
+# GET-then-POST: list existing keys on each repo, only POST if our pubkey is
+# missing. Avoids the 422 ambiguity — GitHub's "key is already in use" can
+# mean the key exists ANYWHERE (other repo / other user), not necessarily here.
+- name: List existing deploy keys per repository
   uri:
     url: "https://api.github.com/repos/Trophalaxeur/{{ item.item }}/keys"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ vault_gh_admin_token }}"
+      Accept: application/vnd.github+json
+    status_code: 200
+  loop: "{{ deploy_pubkeys.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  register: existing_repo_keys
+  no_log: true
+
+- name: Register deploy key on repos where it's missing
+  uri:
+    url: "https://api.github.com/repos/Trophalaxeur/{{ item.0.item }}/keys"
     method: POST
     headers:
       Authorization: "Bearer {{ vault_gh_admin_token }}"
       Accept: application/vnd.github+json
     body_format: json
     body:
-      title: "neon-deploy-{{ item.item }}-{{ ansible_hostname }}"
-      key: "{{ item.content | b64decode | trim }}"
+      title: "neon-deploy-{{ item.0.item }}-{{ ansible_hostname }}"
+      key: "{{ item.0.content | b64decode | trim }}"
       read_only: true
-    status_code: [201, 422]
-  loop: "{{ deploy_pubkeys.results }}"
+    status_code: 201
+  loop: "{{ deploy_pubkeys.results | zip(existing_repo_keys.results) | list }}"
   loop_control:
-    label: "{{ item.item }}"
-  register: deploy_key_results
+    label: "{{ item.0.item }}"
+  # Compare normalized keys: GitHub strips the trailing comment, so we strip
+  # ours too (keep only "algo base64", drop the "neon-deploy-..." suffix).
+  vars:
+    local_key_norm: "{{ item.0.content | b64decode | trim | regex_replace('^(\\S+\\s+\\S+).*', '\\1') }}"
+    remote_keys_norm: "{{ item.1.json | map(attribute='key') | map('regex_replace', '^(\\S+\\s+\\S+).*', '\\1') | list }}"
+  when:
+    - local_key_norm not in remote_keys_norm
   no_log: true
-
-- name: Verify each deploy key was created or already present
-  ansible.builtin.assert:
-    that:
-      - >
-        item.status == 201
-        or (item.status == 422
-            and (item.json.errors | default([{'message': ''}]))[0].message == 'key is already in use')
-    fail_msg: "Deploy key registration on {{ item.item.item }} returned unexpected HTTP {{ item.status }}"
-    success_msg: "{{ item.item.item }}: {{ 'created' if item.status == 201 else 'already exists' }}"
-  loop: "{{ deploy_key_results.results }}"
-  loop_control:
-    label: "{{ item.item.item }}"
 
 # Step 9 — Multica Docker Compose
 - name: Clone Multica repo
