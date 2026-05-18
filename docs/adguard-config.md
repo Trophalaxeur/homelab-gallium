@@ -88,7 +88,7 @@ Rewrites allow AdGuard to resolve custom local hostnames without a full DNS serv
 | `proxmox.lan` / `proxmox.flefevre.fr` | `192.168.1.32` | Proxmox web UI |
 | `adguard.lan` / `adguard.flefevre.fr` | `192.168.1.53` | AdGuard Home web UI |
 | `thallium.lan` | `192.168.1.20` | Dev machine |
-| `neon.lan` / `neon.flefevre.fr` | `192.168.1.60` | Neon agents LXC (Multica + JeanMiPO) |
+| `neon.lan` / `neon.flefevre.fr` | `192.168.1.60` | Neon agents LXC (multica daemon + JeanMiPO — kanban on multica.ai) |
 
 The `.lan` suffix is a convention for non-routable local domains.
 Alternatives: `.home`, `.internal`.

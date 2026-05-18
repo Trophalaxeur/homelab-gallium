@@ -115,7 +115,7 @@
   args:
     creates: /usr/local/bin/multica
 
-# Step 7b — RTK (pinned tag + sha256 checksum)
+# Step 8 — RTK (pinned tag + sha256 checksum)
 - name: Download RTK install script (verified)
   get_url:
     url: https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.40.0/install.sh
@@ -168,7 +168,7 @@
     state: present
     key: "{{ ssh_public_key }}"
 
-# Step 8 — SSH deploy keys (one per repo, GitHub limitation)
+# Step 9 — SSH deploy keys (one per repo, GitHub limitation)
 - name: Create .ssh directory for neonuser
   file:
     path: /home/neonuser/.ssh
@@ -254,7 +254,7 @@
     - local_key_norm not in remote_keys_norm
   no_log: true
 
-# Step 9 — Runtime directories
+# Step 10 — Runtime directories
 - name: Create neon runtime directories
   file:
     path: "{{ item }}"
@@ -267,7 +267,7 @@
     - /home/neonuser/.neon/repos/Trophalaxeur
     - /home/neonuser/.neon/logs
 
-# Step 10 — Clone repos
+# Step 11 — Clone repos
 # /opt is root-owned; pre-create /opt/neon-agents with neonuser ownership
 # so the git clone (run as neonuser) can write into it.
 - name: Create /opt/neon-agents with neonuser ownership
@@ -311,14 +311,14 @@
     dest: /home/neonuser/.neon/repos/Trophalaxeur/bismuth-blog
     force: true
 
-# Step 11 — Initial context build
+# Step 12 — Initial context build
 - name: Build initial context (force)
   become_user: neonuser
   command: bash /opt/neon-agents/scheduler/context-nightly.sh --force
   args:
     creates: /home/neonuser/.neon/context/neon-agents/context.md
 
-# Step 12 — Cron context-nightly
+# Step 13 — Cron context-nightly
 - name: Deploy context-nightly cron
   template:
     src: cron-context.j2
@@ -327,7 +327,7 @@
     group: root
     mode: "0644"
 
-# Step 13 — logrotate
+# Step 14 — logrotate
 - name: Deploy logrotate config
   template:
     src: logrotate-neon.j2
@@ -336,7 +336,7 @@
     group: root
     mode: "0644"
 
-# Step 14 — /etc/neon.env (Phase 1 — no MULTICA_TOKEN yet)
+# Step 15 — /etc/neon.env (Phase 1 — no MULTICA_TOKEN yet)
 - name: Deploy /etc/neon.env
   template:
     src: neon-env.j2
