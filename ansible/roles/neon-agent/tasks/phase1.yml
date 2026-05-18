@@ -110,11 +110,11 @@
   args:
     creates: /usr/local/bin/multica
 
-# Step 7b — RTK
+# Step 7b — RTK (pinned)
 - name: Install RTK (token-optimization proxy)
   become_user: neonuser
   shell: |
-    curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+    curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/tags/v0.40.0/install.sh | sh
   args:
     creates: /home/neonuser/.local/bin/rtk
 
