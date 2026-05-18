@@ -121,11 +121,11 @@
     state: link
     force: true
 
-# Step 7 — multica CLI
+# Step 7 — multica CLI (pinned to tag matching the docker-compose checkout)
 - name: Install multica CLI
   shell: |
     set -o pipefail
-    curl -fsSL https://raw.githubusercontent.com/multica-ai/multica/main/scripts/install.sh | bash
+    curl -fsSL https://raw.githubusercontent.com/multica-ai/multica/refs/tags/v0.3.2/scripts/install.sh | bash
   args:
     executable: /bin/bash
     creates: /usr/local/bin/multica
@@ -250,6 +250,19 @@
     mode: "0600"
   no_log: true   # renders JWT_SECRET, SMTP password
   notify: restart multica
+
+# apt installs docker-ce but doesn't start it; explicit start needed before
+# any docker compose / docker socket access works on a fresh Debian install.
+- name: Ensure Docker daemon is running and enabled
+  systemd:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Wait for Docker socket
+  wait_for:
+    path: /var/run/docker.sock
+    timeout: 30
 
 - name: Pull Multica images
   community.docker.docker_compose_v2:

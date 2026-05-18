@@ -35,14 +35,12 @@ variable "lxc_template" {
 
 variable "lxc_datastore" {
   description = <<-EOT
-    Proxmox datastore pour les disques LXC.
+    Proxmox datastore pour les disques LXC (REQUIRED — pas de default).
+    Valeurs typiques: "local-zfs" (pool ZFS local) ou "local-lvm".
     ⚠️ ForceNew sur changement — terraform RECRÉE le conteneur, perte de données.
-    Default "local-zfs" : pool ZFS local.
-    Si tes conteneurs existants sont sur "local-lvm", set lxc_datastore = "local-lvm"
-    dans terraform.tfvars AVANT le premier `terraform apply` de cette branche.
+    Set explicitement dans terraform.tfvars selon le pool effectivement utilisé.
   EOT
   type        = string
-  default     = "local-zfs"
 }
 
 variable "adguard_vmid" {
